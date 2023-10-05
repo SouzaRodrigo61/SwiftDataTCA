@@ -11,7 +11,9 @@
 		23A64E902ACC5313005B6344 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 23A64E8F2ACC5313005B6344 /* Assets.xcassets */; };
 		23A64E942ACC5313005B6344 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 23A64E932ACC5313005B6344 /* Preview Assets.xcassets */; };
 		23A64E9D2ACC5DFE005B6344 /* ComposableArchitecture in Frameworks */ = {isa = PBXBuildFile; productRef = 23A64E9C2ACC5DFE005B6344 /* ComposableArchitecture */; };
-		23A64E9F2ACC5E16005B6344 /* TCAContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23A64E9E2ACC5E16005B6344 /* TCAContentView.swift */; };
+		23A64E9F2ACC5E16005B6344 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23A64E9E2ACC5E16005B6344 /* ContentView.swift */; };
+		23A64EA72ACF5812005B6344 /* LocalDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23A64EA62ACF5812005B6344 /* LocalDatabase.swift */; };
+		23A64EA92ACF5855005B6344 /* Database.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23A64EA82ACF5855005B6344 /* Database.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -21,7 +23,9 @@
 		23A64E912ACC5313005B6344 /* SwiftDataTCA.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SwiftDataTCA.entitlements; sourceTree = "<group>"; };
 		23A64E932ACC5313005B6344 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		23A64E952ACC5313005B6344 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		23A64E9E2ACC5E16005B6344 /* TCAContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TCAContentView.swift; sourceTree = "<group>"; };
+		23A64E9E2ACC5E16005B6344 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		23A64EA62ACF5812005B6344 /* LocalDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalDatabase.swift; sourceTree = "<group>"; };
+		23A64EA82ACF5855005B6344 /* Database.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Database.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -55,12 +59,13 @@
 		23A64E882ACC5312005B6344 /* SwiftDataTCA */ = {
 			isa = PBXGroup;
 			children = (
+				23A64EA52ACF5803005B6344 /* Service */,
 				23A64E892ACC5312005B6344 /* SwiftDataTCAApp.swift */,
 				23A64E8F2ACC5313005B6344 /* Assets.xcassets */,
 				23A64E912ACC5313005B6344 /* SwiftDataTCA.entitlements */,
 				23A64E952ACC5313005B6344 /* Info.plist */,
 				23A64E922ACC5313005B6344 /* Preview Content */,
-				23A64E9E2ACC5E16005B6344 /* TCAContentView.swift */,
+				23A64E9E2ACC5E16005B6344 /* ContentView.swift */,
 			);
 			path = SwiftDataTCA;
 			sourceTree = "<group>";
@@ -71,6 +76,15 @@
 				23A64E932ACC5313005B6344 /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		23A64EA52ACF5803005B6344 /* Service */ = {
+			isa = PBXGroup;
+			children = (
+				23A64EA62ACF5812005B6344 /* LocalDatabase.swift */,
+				23A64EA82ACF5855005B6344 /* Database.swift */,
+			);
+			path = Service;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -149,7 +163,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				23A64E9F2ACC5E16005B6344 /* TCAContentView.swift in Sources */,
+				23A64EA72ACF5812005B6344 /* LocalDatabase.swift in Sources */,
+				23A64E9F2ACC5E16005B6344 /* ContentView.swift in Sources */,
+				23A64EA92ACF5855005B6344 /* Database.swift in Sources */,
 				23A64E8A2ACC5312005B6344 /* SwiftDataTCAApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

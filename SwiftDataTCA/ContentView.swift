@@ -38,69 +38,6 @@ struct TCAContentView: View {
     }
 }
 
-struct DatabaseService{
-    var container: ModelContainer?
-    var context: ModelContext?
-    
-    init() throws {
-        do {
-            container = try ModelContainer(for: MovieTCA.self)
-            
-            if let container {
-                context = ModelContext(container)
-            }
-        }
-        catch {
-            throw DatabaseServiceError.contextMovie
-        }
-    }
-    
-    enum DatabaseServiceError: Error {
-        case contextMovie
-    }
-}
-
-struct Dep {
-    var fetch: @Sendable () throws -> [MovieTCA]
-    var add: @Sendable (MovieTCA) throws -> Void
-}
-
-extension Dep: DependencyKey {
-    public static let liveValue = Self(
-        fetch: {
-            do {
-                guard let context = try DatabaseService().context else { return [] }
-                
-                let descriptor = FetchDescriptor<MovieTCA>(sortBy: [SortDescriptor(\.title)])
-                return try context.fetch(descriptor)
-            } catch {
-                return []
-            }
-        },
-        add: { model in
-            guard let context = try DatabaseService().context else { return }
-            
-            context.insert(model)
-        }
-    )
-}
-
-extension Dep: TestDependencyKey {
-    public static var previewValue = Self.noop
-    
-    public static let testValue = Self(
-        fetch: unimplemented("\(Self.self).fetch"),
-        add: unimplemented("\(Self.self).add")
-    )
-    
-    static let noop = Self(
-        fetch: { [] },
-        add: { _ in }
-    )
-}
-
-
-
 @Model
 class MovieTCA {
     var title: String
@@ -153,12 +90,3 @@ extension TCAContentView {
         }
     }
 }
-
-
-extension DependencyValues {
-    var swiftData: Dep {
-        get { self[Dep.self] }
-        set { self[Dep.self] = newValue }
-    }
-}
-
