@@ -38,12 +38,11 @@ struct TCAContentView: View {
     }
 }
 
-class DatabaseService{
-    static var shared = DatabaseService()
+struct DatabaseService{
     var container: ModelContainer?
     var context: ModelContext?
     
-    init() {
+    init() throws {
         do {
             container = try ModelContainer(for: MovieTCA.self)
             
@@ -51,22 +50,26 @@ class DatabaseService{
                 context = ModelContext(container)
             }
         }
-        catch{
-            print(error)
+        catch {
+            throw DatabaseServiceError.contextMovie
         }
+    }
+    
+    enum DatabaseServiceError: Error {
+        case contextMovie
     }
 }
 
 struct Dep {
-    var fetch: @Sendable () -> [MovieTCA]
-    var add: @Sendable (MovieTCA) -> Void
+    var fetch: @Sendable () throws -> [MovieTCA]
+    var add: @Sendable (MovieTCA) throws -> Void
 }
 
 extension Dep: DependencyKey {
     public static let liveValue = Self(
         fetch: {
             do {
-                guard let context = DatabaseService.shared.context else { return [] }
+                guard let context = try DatabaseService().context else { return [] }
                 
                 let descriptor = FetchDescriptor<MovieTCA>(sortBy: [SortDescriptor(\.title)])
                 return try context.fetch(descriptor)
@@ -75,13 +78,9 @@ extension Dep: DependencyKey {
             }
         },
         add: { model in
-            do {
-                guard let context = DatabaseService.shared.context else { return }
-                
-                context.insert(model)
-            } catch {
-                dump(error, name: "Error")
-            }
+            guard let context = try DatabaseService().context else { return }
+            
+            context.insert(model)
         }
     )
 }
@@ -131,11 +130,19 @@ extension TCAContentView {
             Reduce { state, action in
                 switch action {
                 case .onAppear:
-                    state.movies = context.fetch()
+                    do {
+                        state.movies = try context.fetch()
+                    } catch {
+                        
+                    }
                     
                     return .none
                 case .add:
-                    context.add(.init(title: "Abestiado", cast: ["Sam Worthington", "Zoe Saldaña", "Stephen Lang", "Michelle Rodriguez"]))
+                    do {
+                        try context.add(.init(title: "Abestiado", cast: ["Sam Worthington", "Zoe Saldaña", "Stephen Lang", "Michelle Rodriguez"]))
+                    } catch {
+                        
+                    }
                     
                     return .run { @MainActor send in
                         send(.onAppear, animation: .default)
