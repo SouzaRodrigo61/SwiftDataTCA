@@ -7,25 +7,42 @@
 
 import Foundation
 import SwiftData
+import Dependencies
 
-struct DatabaseService{
-    var container: ModelContainer?
-    var context: ModelContext?
-    
-    init() throws {
-        do {
-            container = try ModelContainer(for: MovieTCA.self)
-            
-            if let container {
-                context = ModelContext(container)
-            }
-        }
-        catch {
-            throw DatabaseServiceError.contextMovie
-        }
+extension DependencyValues {
+    var databaseService: Database {
+        get { self[Database.self] }
+        set { self[Database.self] = newValue }
     }
-    
-    enum DatabaseServiceError: Error {
-        case contextMovie
+}
+
+fileprivate let appContext: ModelContext = {
+    do {
+        let container = try ModelContainer(for: Movie.self)
+        return ModelContext(container)
+    } catch {
+        fatalError("Failed to create container.")
     }
+}()
+
+struct Database {
+    var context: () throws -> ModelContext
+}
+
+extension Database: DependencyKey {
+    public static let liveValue = Self(
+        context: { appContext }
+    )
+}
+
+extension Database: TestDependencyKey {
+    public static var previewValue = Self.noop
+    
+    public static let testValue = Self(
+        context: unimplemented("\(Self.self).context")
+    )
+    
+    static let noop = Self(
+        context: unimplemented("\(Self.self).context")
+    )
 }

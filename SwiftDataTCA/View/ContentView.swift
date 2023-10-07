@@ -18,6 +18,8 @@ struct TCAContentView: View {
             NavigationStack {
                 List(viewStore.state) { movie in
                     VStack(alignment: .leading) {
+                        Text(movie.id.uuidString)
+                        
                         Text(movie.title)
                             .font(.headline)
                         
@@ -27,7 +29,7 @@ struct TCAContentView: View {
                         store.send(.delete(movie))
                     }
                 }
-                .navigationTitle("MovieDB")
+                .navigationTitle("SwiftData")
                 .toolbar {
                     Button("Add Sample") {
                         store.send(.add)
@@ -43,10 +45,12 @@ struct TCAContentView: View {
 
 @Model
 class Movie {
+    var id: UUID
     var title: String
     var cast: [String]
     
     init(title: String, cast: [String]) {
+        self.id = UUID()
         self.title = title
         self.cast = cast
     }
@@ -54,8 +58,7 @@ class Movie {
 
 extension TCAContentView {
     struct Feature: Reducer {
-        struct State: Identifiable, Equatable {
-            var id = UUID()
+        struct State: Equatable {
             var movies: [Movie] = []
         }
         
@@ -100,7 +103,6 @@ extension TCAContentView {
                     }
                 }
             }
-            ._printChanges()
         }
     }
 }
