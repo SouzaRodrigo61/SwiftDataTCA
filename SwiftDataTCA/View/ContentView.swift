@@ -23,6 +23,9 @@ struct TCAContentView: View {
                         
                         Text(movie.cast.formatted(.list(type: .and)))
                     }
+                    .onTapGesture {
+                        store.send(.delete(movie))
+                    }
                 }
                 .navigationTitle("MovieDB")
                 .toolbar {
@@ -39,7 +42,7 @@ struct TCAContentView: View {
 }
 
 @Model
-class MovieTCA {
+class Movie {
     var title: String
     var cast: [String]
     
@@ -53,12 +56,13 @@ extension TCAContentView {
     struct Feature: Reducer {
         struct State: Identifiable, Equatable {
             var id = UUID()
-            var movies: [MovieTCA] = []
+            var movies: [Movie] = []
         }
         
         enum Action: Equatable {
             case onAppear
             case add
+            case delete(Movie)
         }
         
         @Dependency(\.swiftData) var context
@@ -76,7 +80,17 @@ extension TCAContentView {
                     return .none
                 case .add:
                     do {
-                        try context.add(.init(title: "Abestiado", cast: ["Sam Worthington", "Zoe Saldaña", "Stephen Lang", "Michelle Rodriguez"]))
+                        try context.add(.init(title: "Lord of The Rings", cast: ["Sam Worthington", "Zoe Saldaña", "Stephen Lang", "Michelle Rodriguez"]))
+                    } catch {
+                        
+                    }
+                    
+                    return .run { @MainActor send in
+                        send(.onAppear, animation: .default)
+                    }
+                case .delete(let movie):
+                    do {
+                        try context.delete(movie)
                     } catch {
                         
                     }
