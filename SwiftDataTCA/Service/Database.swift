@@ -18,7 +18,11 @@ extension DependencyValues {
 
 fileprivate let appContext: ModelContext = {
     do {
-        let container = try ModelContainer(for: Movie.self)
+        
+        let url = URL.applicationSupportDirectory.appending(path: "Model.sqlite")
+        let config = ModelConfiguration(url: url)
+        
+        let container = try ModelContainer(for: Movie.self, migrationPlan: MovieMigrationPlan.self, configurations: config)
         return ModelContext(container)
     } catch {
         fatalError("Failed to create container.")

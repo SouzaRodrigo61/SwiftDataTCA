@@ -20,6 +20,11 @@ struct MovieDatabase {
     var fetch: @Sendable () throws -> [Movie]
     var add: @Sendable (Movie) throws -> Void
     var delete: @Sendable (Movie) throws -> Void
+    
+    enum MovieError: Error {
+        case add
+        case delete
+    }
 }
 
 extension MovieDatabase: DependencyKey {
@@ -27,7 +32,6 @@ extension MovieDatabase: DependencyKey {
         fetch: {
             do {
                 @Dependency(\.databaseService.context) var context
-                
                 let movieContext = try context()
                 
                 let descriptor = FetchDescriptor<Movie>(sortBy: [SortDescriptor(\.title)])
@@ -38,26 +42,23 @@ extension MovieDatabase: DependencyKey {
         },
         add: { model in
             do {
-                
                 @Dependency(\.databaseService.context) var context
-                
                 let movieContext = try context()
                 
                 movieContext.insert(model)
             } catch {
-                dump("catch error")
+                throw MovieError.add
             }
         },
         delete: { model in
             do {
                 @Dependency(\.databaseService.context) var context
-                
                 let movieContext = try context()
                 
                 let modelToBeDelete = model
                 movieContext.delete(modelToBeDelete)
             } catch {
-                dump("catch error")
+                throw MovieError.delete
             }
         }
     )

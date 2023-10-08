@@ -25,8 +25,12 @@ struct TCAContentView: View {
                         
                         Text(movie.cast.formatted(.list(type: .and)))
                     }
+                    .background(movie.favorite ? .blue : .clear)
                     .onTapGesture {
-                        store.send(.delete(movie))
+                        store.send(.delete(movie), animation: .snappy)
+                    }
+                    .onLongPressGesture {
+                        store.send(.favorite(movie), animation: .bouncy)
                     }
                 }
                 .navigationTitle("SwiftData")
@@ -43,19 +47,6 @@ struct TCAContentView: View {
     }
 }
 
-@Model
-class Movie {
-    var id: UUID
-    var title: String
-    var cast: [String]
-    
-    init(title: String, cast: [String]) {
-        self.id = UUID()
-        self.title = title
-        self.cast = cast
-    }
-}
-
 extension TCAContentView {
     struct Feature: Reducer {
         struct State: Equatable {
@@ -66,6 +57,7 @@ extension TCAContentView {
             case onAppear
             case add
             case delete(Movie)
+            case favorite(Movie)
         }
         
         @Dependency(\.swiftData) var context
@@ -101,6 +93,10 @@ extension TCAContentView {
                     return .run { @MainActor send in
                         send(.onAppear, animation: .default)
                     }
+                case .favorite(let movie):
+                    movie.favorite.toggle()
+                    
+                    return .none
                 }
             }
         }
