@@ -17,7 +17,8 @@ extension DependencyValues {
 }
 
 struct MovieDatabase {
-    var fetch: @Sendable () throws -> [Movie]
+    var fetchAll: @Sendable () throws -> [Movie]
+    var fetch: @Sendable (FetchDescriptor<Movie>) throws -> [Movie]
     var add: @Sendable (Movie) throws -> Void
     var delete: @Sendable (Movie) throws -> Void
     
@@ -29,12 +30,21 @@ struct MovieDatabase {
 
 extension MovieDatabase: DependencyKey {
     public static let liveValue = Self(
-        fetch: {
+        fetchAll: {
             do {
                 @Dependency(\.databaseService.context) var context
                 let movieContext = try context()
                 
                 let descriptor = FetchDescriptor<Movie>(sortBy: [SortDescriptor(\.title)])
+                return try movieContext.fetch(descriptor)
+            } catch {
+                return []
+            }
+        },
+        fetch: { descriptor in
+            do {
+                @Dependency(\.databaseService.context) var context
+                let movieContext = try context()
                 return try movieContext.fetch(descriptor)
             } catch {
                 return []
@@ -68,13 +78,15 @@ extension MovieDatabase: TestDependencyKey {
     public static var previewValue = Self.noop
     
     public static let testValue = Self(
-        fetch: unimplemented("\(Self.self).fetch"),
+        fetchAll: unimplemented("\(Self.self).fetch"),
+        fetch: unimplemented("\(Self.self).fetchDescriptor"),
         add: unimplemented("\(Self.self).add"),
         delete: unimplemented("\(Self.self).delete")
     )
     
     static let noop = Self(
-        fetch: { [] },
+        fetchAll: { [] },
+        fetch: { _ in [] },
         add: { _ in },
         delete: { _ in }
     )
