@@ -14,6 +14,7 @@ struct SwiftDataTCAApp: App {
         WindowGroup {
             TCAContentView(store: .init(initialState: TCAContentView.Feature.State(), reducer: {
                 TCAContentView.Feature()
+                    ._printChanges()
             }))
         }
     }
