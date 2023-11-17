@@ -15,7 +15,6 @@
 		23A64EA72ACF5812005B6344 /* MovieDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23A64EA62ACF5812005B6344 /* MovieDatabase.swift */; };
 		23A64EA92ACF5855005B6344 /* Database.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23A64EA82ACF5855005B6344 /* Database.swift */; };
 		23A64EAD2AD1AB46005B6344 /* MovieMigration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23A64EAC2AD1AB46005B6344 /* MovieMigration.swift */; };
-		80180C422AFBECC900ADAB03 /* QueryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80180C412AFBECC900ADAB03 /* QueryView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -29,7 +28,6 @@
 		23A64EA62ACF5812005B6344 /* MovieDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovieDatabase.swift; sourceTree = "<group>"; };
 		23A64EA82ACF5855005B6344 /* Database.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Database.swift; sourceTree = "<group>"; };
 		23A64EAC2AD1AB46005B6344 /* MovieMigration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovieMigration.swift; sourceTree = "<group>"; };
-		80180C412AFBECC900ADAB03 /* QueryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QueryView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -96,7 +94,6 @@
 			children = (
 				23A64EAB2AD1AB36005B6344 /* Migrations */,
 				23A64E9E2ACC5E16005B6344 /* ContentView.swift */,
-				80180C412AFBECC900ADAB03 /* QueryView.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -186,7 +183,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				23A64EA72ACF5812005B6344 /* MovieDatabase.swift in Sources */,
-				80180C422AFBECC900ADAB03 /* QueryView.swift in Sources */,
 				23A64E9F2ACC5E16005B6344 /* ContentView.swift in Sources */,
 				23A64EAD2AD1AB46005B6344 /* MovieMigration.swift in Sources */,
 				23A64EA92ACF5855005B6344 /* Database.swift in Sources */,
