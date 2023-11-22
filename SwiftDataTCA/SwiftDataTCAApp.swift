@@ -26,6 +26,7 @@ struct SwiftDataTCAApp: App {
                     TCAContentView.Feature()
                         ._printChanges()
                 }))
+                .modelContext(self.modelContext)
                 .tabItem {
                     Label("TCAContentView", systemImage: "1.circle")
                 }
