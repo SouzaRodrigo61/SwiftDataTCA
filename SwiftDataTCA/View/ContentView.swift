@@ -19,6 +19,24 @@ struct TCAContentView: View {
         let titleSort: TCAContentView.Feature.State.TitleSort?
         let uuidSort: TCAContentView.Feature.State.UUIDSort?
         
+        var fetchDescriptor: FetchDescriptor<Movie> {
+            return .init(predicate: self.predicate, sortBy: self.sort)
+        }
+        private var predicate: Predicate<Movie> {
+            guard !searchString.isEmpty else { return #Predicate<Movie> { _ in true } }
+            
+            return #Predicate {
+                $0.title.localizedStandardContains(searchString)
+                
+            }
+        }
+        private var sort: [SortDescriptor<Movie>] {
+            return [
+                self.titleSort?.descriptor,
+                self.uuidSort?.descriptor
+            ].compactMap { $0 }
+        }
+        
         init(_ state: Feature.State) {
             self.movies = state.movies
             self.searchString = state.searchString
@@ -30,6 +48,10 @@ struct TCAContentView: View {
     var body: some View {
         WithViewStore(store, observe: ViewState.init) { viewStore in
             NavigationStack {
+                TCAContentDataView(fetchDescriptor: viewStore.fetchDescriptor) { movies in
+                    viewStore.send(.onMoviesChange(movies), animation: .default)
+                }
+                
                 Menu("Sort", systemImage: "arrow.up.arrow.down") {
                     Picker("Title", selection: viewStore.binding(get: \.titleSort, send: { .titleSortChanged($0) }).animation()) {
                         Text("A -> Z").tag(TCAContentView_TitleSort?.some(.forward))
@@ -87,9 +109,6 @@ struct TCAContentView: View {
                     }
                 }
             }
-            .onAppear {
-                store.send(.onAppear)
-            }
         }
     }
     
@@ -113,28 +132,31 @@ struct TCAContentView: View {
 typealias TCAContentView_TitleSort = TCAContentView.Feature.State.TitleSort
 typealias TCAContentView_UUIDSort = TCAContentView.Feature.State.UUIDSort
 
+struct TCAContentDataView: View {
+    @Query var moviesQuery: [Movie]
+    let onMoviesChange: ([Movie]) -> Void
+    
+    init(
+        fetchDescriptor: FetchDescriptor<Movie>,
+        onMoviesChange: @escaping ([Movie]) -> Void
+    ) {
+        _moviesQuery = Query(fetchDescriptor)
+        self.onMoviesChange = onMoviesChange
+    }
+    
+    var body: some View {
+        VStack { }
+            .onChange(of: moviesQuery, initial: true) { oldValue, newValue in
+                onMoviesChange(newValue)
+            }
+    }
+}
+
 extension TCAContentView {
     struct Feature: Reducer {
         struct State: Equatable {
             var movies: [Movie] = []
             var searchString: String = ""
-            var fetchDescriptor: FetchDescriptor<Movie> {
-                return .init(predicate: self.predicate, sortBy: self.sort)
-            }
-            var predicate: Predicate<Movie> {
-                guard !searchString.isEmpty else { return #Predicate<Movie> { _ in true } }
-                
-                return #Predicate {
-                    $0.title.localizedStandardContains(searchString)
-                    
-                }
-            }
-            var sort: [SortDescriptor<Movie>] {
-                return [
-                    self.titleSort?.descriptor,
-                    self.uuidSort?.descriptor
-                ].compactMap { $0 }
-            }
             var titleSort: TitleSort?
             public enum TitleSort {
                 case forward, reverse
@@ -157,18 +179,10 @@ extension TCAContentView {
                     }
                 }
             }
-            
-            
-            mutating func refetchMovies() {
-                @Dependency(\.swiftData) var context
-                do {
-                    self.movies = try context.fetch(self.fetchDescriptor)
-                } catch {}
-            }
         }
         
         enum Action: Equatable {
-            case onAppear
+            case onMoviesChange([Movie])
             
             case add
             case delete(Movie)
@@ -186,17 +200,15 @@ extension TCAContentView {
         var body: some Reducer<State, Action> {
             Reduce { state, action in
                 switch action {
-                case .onAppear:
-                    state.refetchMovies()
+                case .onMoviesChange(let movies):
+                    state.movies = movies
                     return .none
                 case .add:
                     do {
                         let randomMovieName = ["Star Wars", "Harry Potter", "Hunger Games", "Lord of the Rings"].randomElement()!
                         try context.add(.init(title: randomMovieName, cast: ["Sam Worthington", "Zoe Saldaña", "Stephen Lang", "Michelle Rodriguez"]))
                     } catch { }
-                    return .run { @MainActor send in
-                        send(.onAppear, animation: .default)
-                    }
+                    return .none
                 case .delete(let movie):
                     do {
                         try context.delete(movie)
@@ -204,9 +216,7 @@ extension TCAContentView {
                         
                     }
                     
-                    return .run { @MainActor send in
-                        send(.onAppear, animation: .default)
-                    }
+                    return .none
                 case .favorite(let movie):
                     movie.favorite.toggle()
                     
@@ -218,21 +228,16 @@ extension TCAContentView {
 //                    state.refetchMovies()
                         
                     // Not sure why but animation doesn't appear to work unless I .run another action
-                    return .run { @MainActor send in
-                        send(.onAppear, animation: .default)
-                    }
+                    return .none
                 case .titleSortChanged(let newSort):
                     state.titleSort = newSort
-                    state.refetchMovies()
                     return .none
                 case .uuidSortChanged(let newSort):
                     state.uuidSort = newSort
-                    state.refetchMovies()
                     return .none
                 case .clearAllSorting:
                     state.uuidSort = nil
                     state.titleSort = nil
-                    state.refetchMovies()
                     return .none
                 }
             }
