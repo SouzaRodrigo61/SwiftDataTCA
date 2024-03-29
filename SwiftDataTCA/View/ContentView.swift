@@ -190,19 +190,13 @@ extension TCAContentView {
                     state.refetchMovies()
                     return .none
                 case .add:
-                    do {
-                        let randomMovieName = ["Star Wars", "Harry Potter", "Hunger Games", "Lord of the Rings"].randomElement()!
-                        try context.add(.init(title: randomMovieName, cast: ["Sam Worthington", "Zoe Saldaña", "Stephen Lang", "Michelle Rodriguez"]))
-                    } catch { }
+                    let randomMovieName = ["Star Wars", "Harry Potter", "Hunger Games", "Lord of the Rings"].randomElement()!
+                    context.add(.init(title: randomMovieName, cast: ["Sam Worthington", "Zoe Saldaña", "Stephen Lang", "Michelle Rodriguez"]))
                     return .run { @MainActor send in
                         send(.onAppear, animation: .default)
                     }
                 case .delete(let movie):
-                    do {
-                        try context.delete(movie)
-                    } catch {
-                        
-                    }
+                    context.delete(movie)
                     
                     return .run { @MainActor send in
                         send(.onAppear, animation: .default)
@@ -241,8 +235,11 @@ extension TCAContentView {
 }
 
 #Preview {
-    TCAContentView(
-        store: .init(initialState: .init(),
-                     reducer: TCAContentView.Feature.init)
-    )
+    @Dependency(\.databaseService) var databaseService
+    let container = databaseService.container()
+    
+    return TCAContentView(store: Store(initialState: TCAContentView.Feature.State(), reducer: {
+        TCAContentView.Feature()
+    }))
+    .modelContainer(container)
 }

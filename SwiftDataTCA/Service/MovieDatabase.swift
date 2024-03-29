@@ -19,8 +19,8 @@ extension DependencyValues {
 struct MovieDatabase {
     var fetchAll: @Sendable () throws -> [Movie]
     var fetch: @Sendable (FetchDescriptor<Movie>) throws -> [Movie]
-    var add: @Sendable (Movie) throws -> Void
-    var delete: @Sendable (Movie) throws -> Void
+    var add: @Sendable (Movie) -> Void
+    var delete: @Sendable (Movie) -> Void
     
     enum MovieError: Error {
         case add
@@ -33,7 +33,7 @@ extension MovieDatabase: DependencyKey {
         fetchAll: {
             do {
                 @Dependency(\.databaseService.context) var context
-                let movieContext = try context()
+                let movieContext = context()
                 
                 let descriptor = FetchDescriptor<Movie>(sortBy: [SortDescriptor(\.title)])
                 return try movieContext.fetch(descriptor)
@@ -44,38 +44,29 @@ extension MovieDatabase: DependencyKey {
         fetch: { descriptor in
             do {
                 @Dependency(\.databaseService.context) var context
-                let movieContext = try context()
+                let movieContext = context()
                 return try movieContext.fetch(descriptor)
             } catch {
                 return []
             }
         },
         add: { model in
-            do {
-                @Dependency(\.databaseService.context) var context
-                let movieContext = try context()
+            @Dependency(\.databaseService.context) var context
+            let movieContext = context()
                 
-                movieContext.insert(model)
-            } catch {
-                throw MovieError.add
-            }
+            movieContext.insert(model)
         },
         delete: { model in
-            do {
-                @Dependency(\.databaseService.context) var context
-                let movieContext = try context()
+            @Dependency(\.databaseService.context) var context
+            let movieContext = context()
                 
-                let modelToBeDelete = model
-                movieContext.delete(modelToBeDelete)
-            } catch {
-                throw MovieError.delete
-            }
+            let modelToBeDelete = model
+            movieContext.delete(modelToBeDelete)
         }
     )
 }
 
 extension MovieDatabase: TestDependencyKey {
-    public static var previewValue = Self.noop
     
     public static let testValue = Self(
         fetchAll: unimplemented("\(Self.self).fetch"),
@@ -84,10 +75,4 @@ extension MovieDatabase: TestDependencyKey {
         delete: unimplemented("\(Self.self).delete")
     )
     
-    static let noop = Self(
-        fetchAll: { [] },
-        fetch: { _ in [] },
-        add: { _ in },
-        delete: { _ in }
-    )
 }
