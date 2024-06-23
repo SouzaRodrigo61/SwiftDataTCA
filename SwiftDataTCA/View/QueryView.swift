@@ -14,18 +14,13 @@ import Dependencies
 struct QueryView: View {
     let store: StoreOf<QueryReducer>
     
-    
-    @Query(FetchDescriptor<Movie>()) var moviesQuery: [Movie] {
-        didSet {
-            store.send(.queryChangedMovies(self.allMovies))
-        }
-    }
+    @Query(FetchDescriptor<Movie>()) var moviesQuery: [Movie]
     
     var body: some View {
-        WithViewStore(store, observe: { $0 }) { viewStore in
+        WithViewStore(store, observe: \.movies) { viewStore in
             NavigationStack {
                 List {
-                    ForEach(self.moviesQuery) { movie in
+                    ForEach(viewStore.state) { movie in
                         VStack {
                             Text("\(movie.title)").font(.title)
                             Text("\(movie.id)")
@@ -46,6 +41,9 @@ struct QueryView: View {
                     Button("Add sample", systemImage: "plus") {
                         viewStore.send(.addMovie, animation: .snappy)
                     }
+                }
+                .onChange(of: self.moviesQuery, initial: true) { _, newValue in
+                    viewStore.send(.queryChangedMovies(newValue))
                 }
             }
         }
