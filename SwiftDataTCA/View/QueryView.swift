@@ -62,8 +62,7 @@ struct QueryReducer: Reducer {
         case favorite(Movie)
     }
     
-    @Dependency(\.swiftData) var context
-    @Dependency(\.databaseService) var databaseService
+    @Dependency(\.swiftData) var database
     
     var body: some ReducerOf<Self> {
         Reduce { state, action in
@@ -72,28 +71,15 @@ struct QueryReducer: Reducer {
                     state.movies = newMovies
                     return .none
                 case .addMovie:
-                    do {
-                        let randomMovieName = ["Star Wars", "Harry Potter", "Hunger Games", "Lord of the Rings"].randomElement()!
-                        try context.add(.init(title: randomMovieName, cast: ["Sam Worthington", "Zoe Saldaña", "Stephen Lang", "Michelle Rodriguez"]))
-                    } catch { }
-                    return .none
+                let randomMovieName = ["Star Wars", "Harry Potter", "Hunger Games", "Lord of the Rings"].randomElement()!
+                database.add(.init(title: randomMovieName, cast: ["Sam Worthington", "Zoe Saldaña", "Stephen Lang", "Michelle Rodriguez"]))
+                return .none
                 case .delete(let movieToDelete):
-                    do {
-                        try context.delete(movieToDelete)
-                    } catch { }
-                    return .none
+                database.delete(movieToDelete)
+                return .none
                 case .favorite(let movieToFavorite):
-                    movieToFavorite.favorite.toggle()
-                    guard let context = try? self.databaseService.context() else {
-                        print("Failed to find context")
-                        return .none
-                    }
-                    do {
-                        try context.save()
-                    } catch {
-                        print("Failed to save")
-                    }
-                    return .none
+                movieToFavorite.favorite.toggle()
+                return .none
             }
         }
     }

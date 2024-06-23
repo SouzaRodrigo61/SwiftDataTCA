@@ -16,37 +16,53 @@ extension DependencyValues {
     }
 }
 
-fileprivate let appContext: ModelContext = {
+fileprivate let liveContext: ModelContext = {
+    ModelContext(liveContainer)
+}()
+
+fileprivate let previewContext: ModelContext = {
+    ModelContext(previewContainer)
+}()
+
+fileprivate let liveContainer: ModelContainer = {
     do {
-        
         let url = URL.applicationSupportDirectory.appending(path: "Model.sqlite")
         let config = ModelConfiguration(url: url)
         
-        let container = try ModelContainer(for: Movie.self, migrationPlan: MovieMigrationPlan.self, configurations: config)
-        return ModelContext(container)
+        return try ModelContainer(for: Movie.self, migrationPlan: MovieMigrationPlan.self, configurations: config)
     } catch {
-        fatalError("Failed to create container.")
+        fatalError("Failed to create live container.")
+    }
+}()
+
+fileprivate let previewContainer: ModelContainer = {
+    do {
+        let config = ModelConfiguration(isStoredInMemoryOnly: true)
+        return try ModelContainer(for: Movie.self, migrationPlan: MovieMigrationPlan.self, configurations: config)
+    } catch {
+        fatalError("Failed to create preview container.")
     }
 }()
 
 struct Database {
-    var context: () throws -> ModelContext
+    var context: @Sendable () -> ModelContext
+    var container: @Sendable () -> ModelContainer
 }
 
 extension Database: DependencyKey {
     public static let liveValue = Self(
-        context: { appContext }
+        context: { liveContext },
+        container: { liveContainer }
     )
 }
 
 extension Database: TestDependencyKey {
-    public static var previewValue = Self.noop
+    public static var previewValue = Self.inMemory
     
-    public static let testValue = Self(
-        context: unimplemented("\(Self.self).context")
-    )
+    public static let testValue = Self.inMemory
     
-    static let noop = Self(
-        context: unimplemented("\(Self.self).context")
+    private static let inMemory = Self(
+        context: { previewContext },
+        container: { previewContainer }
     )
 }

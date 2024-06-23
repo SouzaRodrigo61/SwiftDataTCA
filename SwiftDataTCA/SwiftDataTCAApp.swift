@@ -12,12 +12,6 @@ import Dependencies
 @main
 struct SwiftDataTCAApp: App {
     @Dependency(\.databaseService) var databaseService
-    var modelContext: ModelContext {
-        guard let modelContext = try? self.databaseService.context() else {
-            fatalError("Could not find modelcontext")
-        }
-        return modelContext
-    }
     
     var body: some Scene {
         WindowGroup {
@@ -33,7 +27,7 @@ struct SwiftDataTCAApp: App {
                 QueryView(store: .init(initialState: .init(), reducer: {
                     QueryReducer()._printChanges()
                 }))
-                .modelContext(self.modelContext)
+                .modelContainer(databaseService.container())
                 .tabItem {
                     Label("QueryView", systemImage: "2.circle")
                 }
